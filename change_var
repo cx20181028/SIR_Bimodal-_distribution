@@ -1,0 +1,141 @@
+import random
+
+import networkx as nx
+import  numpy as np
+import EoN
+import matplotlib.pyplot as plt
+import  collections
+
+N=1000
+r=0.004
+'''
+修改网络，使得平均度相同，方差变大
+'''
+def consnet(mark,mr):
+    G = nx.Graph()
+    nodes = range(0,1005)
+
+    '''
+    G.add_nodes_from(nodes)
+    edges = pd.read_csv('email-Eu-core.txt', sep=' ', header=None)
+    edge_lists = [tuple(xi) for xi in edges.values]
+    for edge_list in edge_lists:
+        G.add_edge(*edge_list)    
+    '''
+    if mark==0:
+        G = nx.erdos_renyi_graph(N, mr)
+        degree = nx.degree(G)
+        degree = dict(degree)
+        degree_copy = degree
+        print(degree)
+        degree_list = list(degree.values())
+        degree_avg = int(np.mean(degree_list))
+        degree_var = int(np.var(degree_list))
+        print("degree_avg:", degree_avg)
+        print("degree_var:", degree_var)
+        for key, value in degree.items():
+            degree[key] = (int(value) - degree_avg)
+
+
+        degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+        print("sorted degree",degree)
+        M =4
+        min_degree = []
+        index = 1
+        for key, value in degree.items():
+            if index <= M:
+
+                min_degree.append(int(key))
+                index += 1
+            else:
+                break
+        degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+        print("sorted copydegree", degree_copy)
+
+        max_degree = []
+        index = 1
+        for key, value in degree_copy.items():
+            if index <= M:
+                max_degree.append(int(key))
+                index += 1
+            else:
+                break
+
+        print(min_degree)
+        print(max_degree)
+        max_degree_index = 0
+        for nodeindex in min_degree:
+            ner = list(G.neighbors(nodeindex))
+
+            for i in range(len(ner)-1):
+                    G.remove_edge(nodeindex, ner[i])
+                    G.add_edge(max_degree[max_degree_index], ner[i])
+            max_degree_index += 1
+        degrees = nx.degree(G)
+        degrees = dict(degrees)
+        degrees_list = list(degrees.values())
+        degrees_avg = int(np.mean(degrees_list))
+        degrees_var = int(np.var(degrees_list))
+        print("degree_avg:", degrees_avg)
+        print("degree_var:", degrees_var)
+        return G
+
+    else:
+        G = nx.random_graphs.barabasi_albert_graph(N, mr)
+        degree = nx.degree(G)
+        degree = dict(degree)
+        degree_copy = degree
+        print(degree)
+        degree_list = list(degree.values())
+        degree_avg = int(np.mean(degree_list))
+        degree_var = int(np.var(degree_list))
+        print("degree_avg:", degree_avg)
+        print("degree_var:", degree_var)
+        for key, value in degree.items():
+            degree[key] = (int(value) - degree_avg)
+
+        degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+        print("sorted degree", degree)
+        M = 15
+        min_degree = []
+        index = 1
+        for key, value in degree.items():
+            if index <= M:
+
+                min_degree.append(int(key))
+                index += 1
+            else:
+                break
+        degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+        print("sorted copydegree", degree_copy)
+
+        max_degree = []
+        index = 1
+        for key, value in degree_copy.items():
+            if index <= M:
+                max_degree.append(int(key))
+                index += 1
+            else:
+                break
+
+        print(min_degree)
+        print(max_degree)
+        max_degree_index = 0
+        for nodeindex in min_degree:
+            ner = list(G.neighbors(nodeindex))
+
+            for i in range(len(ner)-1):
+                    #print("qq")
+                    G.remove_edge(nodeindex, ner[i])
+                    G.add_edge(max_degree[0], ner[i])
+            max_degree_index += 1
+        degrees = nx.degree(G)
+        degrees = dict(degrees)
+        print(degrees)
+        degrees_list = list(degrees.values())
+        degrees_avg = int(np.mean(degrees_list))
+        degrees_var = int(np.var(degrees_list))
+        print("degree_avg:", degrees_avg)
+        print("degree_var:", degrees_var)
+        return G
+consnet(1,3)
