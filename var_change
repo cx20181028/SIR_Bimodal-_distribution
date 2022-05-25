@@ -1,0 +1,310 @@
+import random
+
+import networkx as nx
+import numpy as np
+import EoN
+import matplotlib.pyplot as plt
+import collections
+import pandas as pd
+
+# BA scale-free degree network
+# generalize BA network which has 20 nodes, m = 1---1000,12--1000,3
+N = 1000
+r = 0.004
+
+#该函数可以改变网络方差，平均度不变
+def consnet(mark, mr, M,varmax):
+    # G = nx.Graph()
+    # nodes = range(0,1005)
+
+    '''
+    G.add_nodes_from(nodes)
+    edges = pd.read_csv('email-Eu-core.txt', sep=' ', header=None)
+    edge_lists = [tuple(xi) for xi in edges.values]
+    for edge_list in edge_lists:
+        G.add_edge(*edge_list)
+    '''
+    if mark == 0:
+        # G = nx.erdos_renyi_graph(N, mr)
+        while True:
+            G = nx.erdos_renyi_graph(N, mr)
+            if nx.is_connected(G):
+
+                degree = nx.degree(G)
+                degree = dict(degree)
+                degree_copy = degree
+               # print(degree)
+                degree_list = list(degree.values())
+                degree_avg = int(np.mean(degree_list))
+                degree_var = int(np.var(degree_list))
+                #print("degree_avg:", degree_avg)
+                print("degree_var:", degree_var)
+                for key, value in degree.items():
+                    degree[key] = (int(value) - degree_avg)
+
+                degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+                #print("sorted degree", degree)
+                min_degree = []
+                index = 1
+                for key, value in degree.items():
+                    if index <= M:
+
+                        min_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+                degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+                #print("sorted copydegree", degree_copy)
+
+                max_degree = []
+                index = 1
+                for key, value in degree_copy.items():
+                    if index <= M:
+                        max_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+
+                print(min_degree)
+                print(max_degree)
+                max_degree_index = 0
+                for nodeindex in min_degree:
+                    ner = list(G.neighbors(nodeindex))
+
+                    for i in range(len(ner) - 1):
+                        G.remove_edge(nodeindex, ner[i])
+                        G.add_edge(max_degree[max_degree_index], ner[i])
+                    max_degree_index += 1
+                degrees = nx.degree(G)
+                degrees = dict(degrees)
+                # print(degrees)
+                degreelist = list(degrees.values())
+                degrees_avg = int(np.mean(degreelist))
+                degrees_var = int(np.var(degreelist))
+                print("degree_avg:", degrees_avg)
+                print("degree_var:", degrees_var)
+                degree_avg = int(np.mean(degreelist))
+                print("平均度", degree_avg)
+                degree_var = np.var(degreelist)
+                degree_squar = [int(i * i) for i in degreelist]
+                degree_squar_avg = np.mean(degree_squar)
+                beta_c = (degree_avg) / (degree_squar_avg - degree_avg)
+                print("beta_c:", beta_c)
+                if degrees_var <=max(varmax):
+                    continue
+                else:
+
+                # print("success")
+                # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+
+                    return G, beta_c, degree_var, degree_avg, float(degree_squar_avg)
+    else:
+        while True:
+            G = nx.random_graphs.barabasi_albert_graph(N, mr)
+            if nx.is_connected(G):
+                degree = nx.degree(G)
+                degree = dict(degree)
+                degree_copy = degree
+                # print(degree)
+                degree_list = list(degree.values())
+                degree_avg = int(np.mean(degree_list))
+                degree_var = int(np.var(degree_list))
+                # print("degree_avg:", degree_avg)
+                # print("degree_var:", degree_var)
+                for key, value in degree.items():
+                    degree[key] = (int(value) - degree_avg)
+
+                degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+                # print("sorted degree", degree)
+                min_degree = []
+                index = 1
+                for key, value in degree.items():
+                    if index <= M:
+
+                        min_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+                degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+                # print("sorted copydegree", degree_copy)
+
+                max_degree = []
+                index = 1
+                for key, value in degree_copy.items():
+                    if index <= M:
+                        max_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+
+                # print(min_degree)
+                # print(max_degree)
+                max_degree_index = 0
+                for nodeindex in min_degree:
+                    ner = list(G.neighbors(nodeindex))
+
+                    for i in range(len(ner) - 1):
+                        # print("qq")
+                        G.remove_edge(nodeindex, ner[i])
+                        G.add_edge(max_degree[max_degree_index], ner[i])
+                    max_degree_index += 1
+                degrees = nx.degree(G)
+                degrees = dict(degrees)
+                # print(degrees)
+                degreelist = list(degrees.values())
+                degrees_avg = int(np.mean(degreelist))
+                degrees_var = int(np.var(degreelist))
+                print("degree_avg:", degrees_avg)
+                print("degree_var:", degrees_var)
+                degree_avg = np.mean(degreelist)
+                print("平均度", degree_avg)
+                degree_var = np.var(degreelist)
+                degree_squar = [int(i * i) for i in degreelist]
+                degree_squar_avg = np.mean(degree_squar)
+                beta_c = (degree_avg) / (degree_squar_avg - degree_avg)
+                print("beta_c:", beta_c)
+                # print("success")
+                # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+
+                if degrees_var <= max(varmax):
+                    continue
+                else:
+
+                    # print("success")
+                    # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+
+                    return G, beta_c, degree_var, degree_avg, float(degree_squar_avg)
+
+
+
+def bimodal():
+    iterations = 1000  # run  simulations
+    initial_node = [0]
+
+    beta_range_er=[]
+    beta_range_er2 = []
+    degree_avg_er=[]
+    degree_squar_avg_er=[]
+    pvars=[]
+    pavgs=[]
+    #ER,mark=0
+    ervarmax=[0]
+    print("-------------------er------------------")
+    for r in np.arange(0,200,20):
+        G,beta_c,degree_var,degree_avg,degree_squar_avg = consnet(0,0.02,r,ervarmax)
+        ervarmax.append(degree_var)
+
+        neighbors=list(G.neighbors(0))
+        k=len(neighbors)
+        #print("k",k)
+        for rate in np.arange(6,1000,2):
+            gamma = beta_c
+            Rt = []
+            for counter in range(iterations):
+                    t, S, I, R = EoN.fast_SIR(G, gamma * rate, 1, initial_infecteds=initial_node)
+                    Rt.append(R[-1])
+            t = dict(collections.Counter(Rt))
+            num0 = t.get(1, 0)
+            nun1 = t.get(2, 0)
+            num2 = t.get(3, 0)
+            one_num = num2 + nun1 + num0
+            #print("one_number",one_num)
+            #print(type(one_num))
+            #print(((abs(1-gamma * rate))**k))
+            one_rate=int(one_num)/iterations
+            if one_rate < ((abs(1-gamma * rate))**k):
+                beta_range_er.append((rate-3)*beta_c)
+                beta_range_er2.append(rate-3)
+                degree_avg_er.append(degree_avg)
+                pvars.append(degree_var)
+                pavgs.append(degree_avg)
+                degree_squar_avg_er.append(degree_squar_avg)
+                break
+    print(beta_range_er)
+    print(degree_avg_er)
+    with open('var_er22.txt', 'w') as fp:
+        [fp.write(str(item) + '\n') for item in pvars]
+        fp.close()
+    with open('avg_er22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in pavgs]
+            fp.close()
+    with open('degree_squar_avg_er22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in degree_squar_avg_er]
+            fp.close()
+    with open('range_mutiple_er22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in beta_range_er2]
+            fp.close()
+    with open('range_er22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in beta_range_er]
+            fp.close()
+    beta_range_ba=[]
+    beta_range_ba2 = []
+    degree_avg_ba=[]
+    degree_squar_avg_ba=[]
+    pvar=[]
+    pavg=[]
+    #ba,mark=1
+    print("-------------------ba------------------")
+    bavarmax=[0]
+    for r in range(0,200,20):
+        G,beta_c,degree_var,degree_avg,degree_squar_avg = consnet(1,3,r,bavarmax)
+        bavarmax.append(degree_var)
+
+        neighbors=list(G.neighbors(0))
+        k=len(neighbors)
+        for rate in np.arange(6,1000,2):
+            gamma = beta_c
+            Rt = []
+            for counter in range(iterations):
+                    t, S, I, R = EoN.fast_SIR(G, gamma * rate, 1, initial_infecteds=initial_node)
+                    Rt.append(R[-1])
+            t = dict(collections.Counter(Rt))
+            num0 = t.get(1, 0)
+            nun1 = t.get(2, 0)
+            num2 = t.get(3, 0)
+            one_num = num2 + nun1 + num0
+            one_rate=int(one_num)/iterations
+            if one_rate < (abs(1-gamma * rate))**k:
+                beta_range_ba.append((rate-3)*beta_c)
+                beta_range_ba2.append(rate-3)
+                degree_avg_ba.append(degree_avg)
+                pvar.append(degree_var)
+                pavg.append(degree_avg)
+                degree_squar_avg_ba.append(degree_squar_avg)
+                break
+    print(beta_range_ba)
+    print(degree_avg_ba)
+    with open('var_ba22.txt', 'w') as fp:
+        [fp.write(str(item) + '\n') for item in pvar]
+        fp.close()
+    with open('avg_ba22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in pavg]
+            fp.close()
+    with open('degree_squar_avg_ba22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in degree_squar_avg_ba]
+            fp.close()
+    with open('range_mutiple_ba22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in beta_range_ba2]
+            fp.close()
+    with open('range_ba22.txt', 'w') as fp:
+            [fp.write(str(item) + '\n') for item in beta_range_ba]
+    plt.plot(degree_avg_er, beta_range_er, label="ER")
+    plt.plot(degree_avg_ba, beta_range_ba, label="BA")
+    plt.title("bimodal range")
+    plt.xlabel("degree_avg")
+    plt.ylabel("bimodal_range")
+    plt.legend(loc="upper right")
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 显示中文标签
+    plt.savefig("range_avgyz.png")
+    plt.clf()
+    plt.plot(degree_avg_er, beta_range_er2, label="ER")
+    plt.plot(degree_avg_ba, beta_range_ba2, label="BA")
+    plt.title("bimodal range(beta of mutiple)")
+    plt.xlabel("degree_avg")
+    plt.ylabel("bimodal_range")
+    plt.legend(loc="upper right")
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 显示中文标签
+    plt.savefig("range_avg_mutiple22.png")
+    #plt.show()
+    plt.clf()
+bimodal()
