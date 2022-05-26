@@ -1,0 +1,424 @@
+
+import networkx as nx
+import  numpy as np
+import EoN
+import matplotlib.pyplot as plt
+import  collections
+from matplotlib.pyplot import MultipleLocator
+import matplotlib.ticker as mtick
+import matplotlib.gridspec as gridspec
+N=500
+r=0.004
+def consnet(mark, mr, M):
+    # G = nx.Graph()
+    # nodes = range(0,1005)
+
+    '''
+    G.add_nodes_from(nodes)
+    edges = pd.read_csv('email-Eu-core.txt', sep=' ', header=None)
+    edge_lists = [tuple(xi) for xi in edges.values]
+    for edge_list in edge_lists:
+        G.add_edge(*edge_list)
+    '''
+    if mark == 0:
+        # G = nx.erdos_renyi_graph(N, mr)
+        while True:
+            G = nx.erdos_renyi_graph(N, mr)
+            varmax=[]
+            G1=nx.Graph(G)#实现网络的浅复制
+            if nx.is_connected(G):
+
+                degree = nx.degree(G)
+                degree = dict(degree)
+                degree_copy = degree
+               # print(degree)
+                degree_list = list(degree.values())
+                degree_avg = int(np.mean(degree_list))
+                degree_var = int(np.var(degree_list))
+                varmax.append(degree_var)
+                #print("degree_avg:", degree_avg)
+                print("degree_var:", degree_var)
+                for key, value in degree.items():
+                    degree[key] = (int(value) - degree_avg)
+
+                degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+                #print("sorted degree", degree)
+                min_degree = []
+                index = 1
+                for key, value in degree.items():
+                    if index <= M:
+
+                        min_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+                degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+                #print("sorted copydegree", degree_copy)
+
+                max_degree = []
+                index = 1
+                for key, value in degree_copy.items():
+                    if index <= M:
+                        max_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+
+                print(min_degree)
+                print(max_degree)
+                max_degree_index = 0
+                for nodeindex in min_degree:
+                    ner = list(G.neighbors(nodeindex))
+
+                    for i in range(len(ner) - 1):
+                        G.remove_edge(nodeindex, ner[i])
+                        G.add_edge(max_degree[max_degree_index], ner[i])
+                    max_degree_index += 1
+                degrees = nx.degree(G)
+                degrees = dict(degrees)
+                # print(degrees)
+                degreelist = list(degrees.values())
+                degreelist=[i+1 for i in degreelist]
+                degrees_avg = int(np.mean(degreelist))
+                degrees_var = int(np.var(degreelist))
+                print("degree_avg:", degrees_avg)
+                print("degree_var:", degrees_var)
+                degree_avg = int(np.mean(degreelist))
+                print("平均度", degree_avg)
+                degree_var = np.var(degreelist)
+                degree_squar = [int(i * i) for i in degreelist]
+                degree_squar_avg = np.mean(degree_squar)
+                beta_c = (degree_avg) / (degree_squar_avg - degree_avg)
+                print("beta_c:", beta_c)
+                if degrees_var <=max(varmax):
+                    continue
+                else:
+
+                    # print("success")
+                    # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+                    c = nx.union(G, G1, rename=('a-', 'b-'))
+                    for i in range(N):
+                         a="a-"+str(i)
+                         b="b-"+str(i)
+                         c.add_edge(a, b)
+                    print(c.number_of_nodes())
+
+                    return c, beta_c, degree_var, degree_avg, float(degree_squar_avg)
+    else:
+        while True:
+            varmax = []
+            G = nx.random_graphs.barabasi_albert_graph(N, mr)
+            G1 = nx.Graph(G)  # 实现网络的浅复制
+            if nx.is_connected(G):
+                degree = nx.degree(G)
+                degree = dict(degree)
+                degree_copy = degree
+                # print(degree)
+                degree_list = list(degree.values())
+                degree_avg = int(np.mean(degree_list))
+                degree_var = int(np.var(degree_list))
+                varmax.append(degree_var)
+                # print("degree_avg:", degree_avg)
+                # print("degree_var:", degree_var)
+                for key, value in degree.items():
+                    degree[key] = (int(value) - degree_avg)
+
+                degree = dict(sorted(degree.items(), key=lambda item: item[1], reverse=False))
+                # print("sorted degree", degree)
+                min_degree = []
+                index = 1
+                for key, value in degree.items():
+                    if index <= M:
+
+                        min_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+                degree_copy = dict(sorted(degree.items(), key=lambda item: item[1], reverse=True))
+                # print("sorted copydegree", degree_copy)
+
+                max_degree = []
+                index = 1
+                for key, value in degree_copy.items():
+                    if index <= M:
+                        max_degree.append(int(key))
+                        index += 1
+                    else:
+                        break
+
+                # print(min_degree)
+                # print(max_degree)
+                max_degree_index = 0
+                for nodeindex in min_degree:
+                    ner = list(G.neighbors(nodeindex))
+
+                    for i in range(len(ner) - 1):
+                        # print("qq")
+                        G.remove_edge(nodeindex, ner[i])
+                        G.add_edge(max_degree[max_degree_index], ner[i])
+                    max_degree_index += 1
+                degrees = nx.degree(G)
+                degrees = dict(degrees)
+                # print(degrees)
+                degreelist = list(degrees.values())
+                degrees_avg = int(np.mean(degreelist))
+                degrees_var = int(np.var(degreelist))
+                print("degree_avg:", degrees_avg)
+                print("degree_var:", degrees_var)
+                degree_avg = np.mean(degreelist)
+                print("平均度", degree_avg)
+                degree_var = np.var(degreelist)
+                degree_squar = [int(i * i) for i in degreelist]
+                degree_squar_avg = np.mean(degree_squar)
+                beta_c = (degree_avg) / (degree_squar_avg - degree_avg)
+                print("beta_c:", beta_c)
+                # print("success")
+                # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+
+                if degrees_var <= max(varmax):
+                    continue
+                else:
+                    c = nx.union(G, G1, rename=('a-', 'b-'))
+                    for i in range(N):
+                         a="a-"+str(i)
+                         b="b-"+str(i)
+                         c.add_edge(a, b)
+                    print(c.number_of_nodes())
+
+                    # print("success")
+                    # print("平均聚类系数(average clustering): ", nx.average_clustering(G))
+
+                    return G, beta_c, degree_var, degree_avg, float(degree_squar_avg)
+
+def nets():
+    G, beta_c, degree_var, degree_avg, degree_squar_avg= consnet(0,0.02,5)
+    return G, beta_c, degree_var, degree_avg, degree_squar_avg
+
+
+
+
+"""
+Function
+----------
+This function aims to achieve the simulation of SIR Model
+
+Parameters
+----------
+1. G : Input Graph
+2. Infected : The ndarray including the nodes infected at first
+3. Beta: Transmission probability
+4. Gamma: Recovery probability
+5. Epoch : The iterations in total
+6. Drawing: Whether to draw the pic in this function
+"""
+# The best one
+# The method from the infected nodes
+def Evolution_SIR_new(G, Infected,InfectedB, Beta = 0.5, Gamma = 0.50, Epoch = None, Drawing = False):
+
+    # Get the number of the nodes
+    Node_num = len(G.nodes)
+
+    # Initialize the state of the nodes, -1 denotes a recovered node, 1 denotes a suspetible node while 0 denotes an infected node
+    Node_state = np.ones(Node_num).astype(np.int8)
+    Node_state[Infected] = 0
+    for i in range(int(Node_num/2),Node_num,1):
+
+        Node_state[i]=2
+    Node_state[InfectedB] = 3
+    if Epoch is not None:
+        arr = np.zeros((Epoch, Node_num)).astype(np.int8)
+        arr[0] = Node_state
+
+    # Get the Adjacent matrix of the Graph
+    A = np.array(nx.adjacency_matrix(G).astype(np.int8).todense())
+
+    # print("3.Adjacent Matrix is prepared!")
+
+    x_label = [0]
+
+    Infected_tol = [len(Infected)]
+    Recovery_tol = [0]
+    Suscept_tol = [len(G)/2-len(Infected)]
+
+    Infected_tolB = [len(InfectedB)]
+    Recovery_tolB = [0]
+    Suscept_tolB = [len(G)/2-len(InfectedB)]
+
+    if Epoch is not None:
+        ### Problem describe
+        for i in range(1, Epoch):
+
+            x_label.append(i)
+            # Fisrt Control the recovery of the Node Infected
+
+            # Deep copy of Node_state
+            Tmp_Node_state = Node_state.copy()
+            zero_pos = np.array(np.where(Tmp_Node_state == 0)[0])
+            one_pos = np.array(np.where(Tmp_Node_state == 1)[0])
+
+            Tmp_Node_state[zero_pos] = 1
+            Tmp_Node_state[one_pos] = 0
+
+            x = np.random.rand(Node_num)
+            x = x * Tmp_Node_state
+            Recovry_iter = np.array(np.intersect1d(np.where(x < Gamma)[0], np.where(x > 0)[0]))
+
+            Tmp = Infected.copy()
+
+            # Second Control the Node Infected
+            for infected_index in Infected:
+                # Generate the array containing all the random seed's state
+                y = np.random.rand(Node_num)
+                y = y * Node_state
+                y = y * A[infected_index]
+
+                # Get the state of this iter
+                Infected_iter = np.array(np.intersect1d(np.where(y < Beta)[0],np.where(y > 0)[0]))
+
+                # Refresh the spreading in real time
+                Node_state[Infected_iter] = 0
+
+                # Refresh the state of the nodes
+                Tmp = np.union1d(Infected_iter, Tmp)
+
+            Node_state[Recovry_iter] = -1
+            Tmp = np.setdiff1d(Tmp, Recovry_iter)
+
+            Infected_tol.append(len(np.where(Node_state == 0)[0]))
+            Recovery_tol.append(len(np.where(Node_state == -1)[0]))
+            Suscept_tol.append(len(np.where(Node_state == 1)[0]))
+
+            Infected = Tmp.copy()
+            arr[i] = Node_state
+    else:
+        i = 1
+        while i == 1 or Infected_tol[len(Infected_tol) - 1] != 0 or Infected_tol[len(Infected_tolB) - 1] != 0:
+            x_label.append(i)
+            i = i + 1
+            # Fisrt Control the recovery of the Node Infected
+
+            # Deep copy of Node_state
+            Tmp_Node_state = Node_state.copy()
+            zero_pos = np.array(np.where(Tmp_Node_state == 0)[0])
+            one_pos = np.array(np.where(Tmp_Node_state == 1)[0])
+
+            Tmp_Node_state[zero_pos] = 1
+            Tmp_Node_state[one_pos] = 0
+
+            x = np.random.rand(Node_num)
+            x = x * Tmp_Node_state
+            Recovery_iter = np.array(np.intersect1d(np.where(x < Gamma)[0], np.where(x > 0)[0]))
+
+            Tmp = Infected.copy()
+
+            # Second Control the Node Infected
+            for infected_index in Infected:
+                # Generate the array containing all the random seed's state
+                y = np.random.rand(Node_num)
+
+                # Whether Susceptible
+                y = y * Node_state
+
+                # Whether neighbor
+                y = y * A[infected_index]
+
+                # Get the state of this iter
+                Infected_iter = np.array(np.intersect1d(np.where(y < Beta)[0], np.where(y > 0)[0]))
+
+                # Refresh the spreading in real time
+                Node_state[Infected_iter] = 0
+
+                # Refresh the state of the nodes
+                Tmp = np.union1d(Infected_iter, Tmp)
+
+            Node_state[Recovery_iter] = -1
+            Tmp = np.setdiff1d(Tmp, Recovery_iter)
+
+            Infected_tol.append(len(np.where(Node_state == 0)[0]))
+            Recovery_tol.append(len(np.where(Node_state == -1)[0]))
+            Suscept_tol.append(len(np.where(Node_state == 1)[0]))
+            Infected = Tmp.copy()
+
+            #B社区 2-suspective,3 infected ,-2 recovered
+            Tmp_Node_state = Node_state.copy()
+            three_pos = np.array(np.where(Tmp_Node_state == 3)[0])
+            two_pos = np.array(np.where(Tmp_Node_state == 2)[0])
+
+            Tmp_Node_state[three_pos] = 1
+            Tmp_Node_state[two_pos] = 0
+
+            x = np.random.rand(Node_num)
+            x = x * Tmp_Node_state
+            Recovery_iter = np.array(np.intersect1d(np.where(x < Gamma)[0], np.where(x > 0)[0]))
+
+            Tmp = InfectedB.copy()
+            for infected_index in InfectedB:
+                # Generate the array containing all the random seed's state
+                y = np.random.rand(Node_num)
+
+                # Whether Susceptible
+                y = y * Node_state
+
+                # Whether neighbor
+                y = y * A[infected_index]
+
+                # Get the state of this iter
+                Infected_iter = np.array(np.intersect1d(np.where(y < 2*Beta)[0], np.where(y > 0)[0]))
+
+                # Refresh the spreading in real time
+                Node_state[Infected_iter] = 3
+
+                # Refresh the state of the nodes
+                Tmp = np.union1d(Infected_iter, Tmp)
+
+            Node_state[Recovery_iter] = -2
+            Tmp = np.setdiff1d(Tmp, Recovery_iter)
+
+            Infected_tolB.append(len(np.where(Node_state == 3)[0]))
+            Recovery_tolB.append(len(np.where(Node_state == -2)[0]))
+            Suscept_tolB.append(len(np.where(Node_state == 2)[0]))
+
+            InfectedB = Tmp.copy()
+
+    if Drawing == True:
+
+        plt.xlabel("t")
+        plt.ylabel("Proportion")
+
+        plt.plot(x_label, np.array(Recovery_tol)/Node_num, label="Recovered")
+        plt.plot(x_label, np.array(Infected_tol)/Node_num, label="Infectious")
+        plt.plot(x_label, np.array(Suscept_tol)/Node_num, label="Susceptible")
+
+        # ax = plt.gca()
+        # ax.xaxis.set_major_locator(MultipleLocator(1))
+        # plt.xlim(-0.5, Epoch)
+
+        plt.legend()
+
+        # plt.savefig("Output/"+str(G.name)+"/output_SIR.jpg")
+        plt.show()
+        plt.close()
+
+    if Epoch is not None:
+        return Infected_tol, Recovery_tol, Suscept_tol, arr
+
+    # arr记录了所有的状态
+    return Infected_tol, Recovery_tol, Suscept_tol, Node_state,Infected_tolB, Recovery_tolB, Suscept_tolB
+
+G, beta_c, degree_var, degree_avg, degree_squar_avg=nets()
+communityA=[]
+communityB=[]
+x_value=[]
+for i in range(1000):
+    Infected_tol, Recovery_tol, Suscept_tol, Node_state,Infected_tolB, Recovery_tolB, Suscept_tolB= Evolution_SIR_new(G=G, Infected=[0],InfectedB= [500], Beta=0.5,Gamma= 0.5, Epoch=None, Drawing =False)
+    communityA.append(Recovery_tol[-1])
+    communityB.append(Recovery_tolB[-1])
+x_value.append(communityA)
+x_value.append(communityB)
+print(communityA)
+plt.hist(x_value,bins=10,edgecolor="r",histtype="bar",alpha=0.5,label=["communityA","communityB"])
+plt.title("community-vote")
+plt.xlabel("Recovery_number")
+plt.ylabel("frequency")
+plt.legend()
+plt.show()
